@@ -7,6 +7,7 @@ Este proyecto ya está completo: 5 herramientas de práctica (Sesión 1, Ventana
 ```
 simulador-laura/
 ├── public/
+│   ├── lh-mirror-icon.png  ← ícono de la marca (recortado del logo personal)
 │   ├── index.html          ← página de inicio con enlaces a las 5 herramientas
 │   ├── sesion1.html
 │   ├── johari.html
