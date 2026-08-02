@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LH Mirror · Liderarme para poder liderar</title>
+<style>
+  :root {
+    --navy-title: #00084D;
+    --copper: #C9A11D;
+    --page-bg: #F7F8FC;
+    --muted: #516294;
+    --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page-bg);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    color: #222437;
+    min-height: 100vh;
+  }
+  .hero-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 20px 0;
+  }
+  .hero-img {
+    width: 100%;
+    display: block;
+    border-radius: 16px;
+    box-shadow: 0 18px 46px rgba(10, 15, 60, 0.22);
+  }
+  .cards {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 34px 20px 70px;
+  }
+  a.card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(20, 30, 80, 0.07);
+    padding: 22px 28px;
+    margin-bottom: 16px;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+  }
+  a.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(20, 30, 80, 0.12);
+  }
+  .card .kicker {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--copper);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .card h2 {
+    font-family: Cambria, Georgia, serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--navy-title);
+    margin: 0 0 6px;
+  }
+  .card p {
+    font-size: 14.5px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.4;
+  }
+  @media (max-width: 560px) {
+    .card h2 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="hero-wrap">
+    <img class="hero-img" src="/hero.jpg" alt="LH Mirror · Liderarme para poder liderar · Reflect. Reveal. Respond.">
+  </div>
+
+  <div class="cards">
+    <a class="card" href="/sesion1.html">
+      <div class="kicker">Sesión 1 · Me veo</div>
+      <h2>Detonante, emoción y cuerpo</h2>
+      <p>Identifica la tríada ante una situación nueva.</p>
+    </a>
+    <a class="card" href="/johari.html">
+      <div class="kicker">Sesión 1 · Me veo</div>
+      <h2>Ventana de Johari</h2>
+      <p>Explora un momento de tensión desde los cuatro cuadrantes.</p>
+    </a>
+    <a class="card" href="/sesion2.html">
+      <div class="kicker">Sesión 2 · Me regulo</div>
+      <h2>Radar · PAUSA · Brújula</h2>
+      <p>Aplica el sistema completo a una situación de presión nueva.</p>
+    </a>
+    <a class="card" href="/sesion3.html">
+      <div class="kicker">Sesión 3 · Los leo</div>
+      <h2>Practica con tu contraparte</h2>
+      <p>La IA responde en el papel de la persona que describas.</p>
+    </a>
+    <a class="card" href="/sesion4.html">
+      <div class="kicker">Sesión 4 · Los movilizo</div>
+      <h2>Situación · Conducta · Impacto</h2>
+      <p>Conversación individual o decisión de equipo.</p>
+    </a>
+  </div>
+
+</body>
+</html>
