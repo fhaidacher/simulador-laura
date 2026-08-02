@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Laura · Ventana de Johari</title>
+<style>
+  :root {
+    --navy: #1E2761; --navy-deep: #171d4d; --navy-soft: #2A3570;
+    --ice: #CADCFC; --copper: #C9A227; --copper-soft: #FFF3D6;
+    --card: #F4F6FC; --muted: #5A6390; --text: #222437; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 300px, #F7F8FC 300px, #F7F8FC 100%);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    color: var(--text); min-height: 100vh; display: flex; justify-content: center;
+    padding: 40px 20px 80px;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  .eyebrow { text-align: center; color: var(--ice); font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+  h1 { font-family: Cambria, Georgia, serif; font-style: italic; font-weight: 700; color: var(--white); text-align: center; font-size: 32px; margin: 0 0 8px; }
+  .sub { text-align: center; color: var(--ice); font-size: 14px; margin-bottom: 30px; }
+
+  .card { background: var(--white); border-radius: 14px; box-shadow: 0 18px 40px rgba(23,29,77,0.18); padding: 28px 30px; margin-bottom: 20px; }
+  .kicker { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--copper); margin: 0 0 10px; }
+  .scenario-text { font-family: Cambria, Georgia, serif; font-style: italic; font-size: 17px; line-height: 1.5; color: var(--navy); margin: 0; }
+
+  .protocol { background: var(--navy-soft); color: var(--copper-soft); border-radius: 10px; padding: 12px 16px; font-size: 12.5px; font-weight: 700; margin-bottom: 4px; line-height: 1.4; }
+
+  .quad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  .quad { background: var(--card); border-radius: 10px; padding: 16px 18px; }
+  .quad label { display: block; font-size: 12.5px; font-weight: 700; color: var(--copper); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .quad .q-text { font-size: 12.5px; color: var(--muted); font-style: italic; margin: 0 0 8px; }
+  textarea { width: 100%; min-height: 64px; resize: vertical; border: 1.5px solid var(--ice); border-radius: 8px; padding: 10px 12px; font-family: inherit; font-size: 14px; color: var(--text); background: var(--white); }
+  textarea:focus { outline: none; border-color: var(--copper); }
+
+  .btn-row { display: flex; justify-content: center; margin-top: 20px; }
+  button.primary { background: var(--copper); color: var(--white); border: none; padding: 14px 30px; font-size: 15px; font-weight: 700; border-radius: 999px; cursor: pointer; box-shadow: 0 8px 20px rgba(201,162,39,0.35); }
+  button.primary:disabled { opacity: 0.6; cursor: default; box-shadow: none; }
+  button.ghost { background: none; border: 1.5px solid var(--ice); color: var(--navy); padding: 10px 22px; font-size: 13.5px; font-weight: 700; border-radius: 999px; cursor: pointer; margin-top: 18px; }
+  button.ghost:hover { border-color: var(--copper); color: var(--copper); }
+
+  .loading { display: none; align-items: center; gap: 18px; justify-content: center; padding: 26px 0 4px; }
+  .loading.active { display: flex; }
+  .rings { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+  .rings span { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--copper); opacity: 0; animation: ripple 1.8s ease-out infinite; }
+  .rings span:nth-child(2) { animation-delay: 0.5s; } .rings span:nth-child(3) { animation-delay: 1s; }
+  @keyframes ripple { 0% { transform: scale(0.3); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
+  .loading-text { font-style: italic; color: var(--muted); font-size: 14px; }
+
+  .feedback { display: none; background: var(--navy); border-radius: 14px; padding: 26px 30px; margin-top: 4px; animation: rise 0.4s ease; }
+  .feedback.active { display: block; }
+  @keyframes rise { from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
+  .feedback .kicker { color: var(--copper); }
+  .feedback-text { font-family: Cambria, Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.6; color: var(--white); margin: 4px 0 0; white-space: pre-wrap; }
+
+  .not-a-grade { text-align: center; font-size: 12.5px; color: var(--muted); font-style: italic; margin-top: 16px; }
+  .error { display: none; background: #FDECEC; border: 1px solid #E8A6A6; color: #8A2C2C; border-radius: 10px; padding: 14px 16px; font-size: 13.5px; margin-top: 12px; }
+  .error.active { display: block; }
+  .actions-center { text-align: center; }
+
+  @media (max-width: 560px) {
+    .quad-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; } .card { padding: 20px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Práctica aplicada · Sesión 1 · Me veo</div>
+  <h1>Simulador Laura</h1>
+  <div class="sub">Tu Ventana de Johari, aplicada a un momento de tensión nuevo.</div>
+
+  <div class="card">
+    <p class="kicker">La situación</p>
+    <p class="scenario-text" id="scenario">
+      Piensa en un momento reciente, distinto al de la sesión, en el que sentiste
+      tensión o molestia con alguien de tu equipo o de tu entorno de trabajo.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="protocol">Protocolo: no escribas nombres ni datos que permitan identificar a la persona.</div>
+
+    <div class="quad-grid">
+      <div class="quad">
+        <label>Abierto</label>
+        <p class="q-text">¿Qué fue visible para todos en ese momento — tu tono, tus palabras, tu expresión?</p>
+        <textarea id="abierto" placeholder="Escribe aquí..."></textarea>
+      </div>
+      <div class="quad">
+        <label>Ciego</label>
+        <p class="q-text">Si le preguntaras a alguien de confianza, ¿qué crees que notó en ti sin que te dieras cuenta?</p>
+        <textarea id="ciego" placeholder="Escribe aquí..."></textarea>
+      </div>
+      <div class="quad">
+        <label>Oculto</label>
+        <p class="q-text">¿Qué sentiste que decidiste no mostrar?</p>
+        <textarea id="oculto" placeholder="Escribe aquí..."></textarea>
+      </div>
+      <div class="quad">
+        <label>Desconocido</label>
+        <p class="q-text">¿Qué patrón más profundo podría estar aquí, que ni siquiera tú has notado todavía?</p>
+        <textarea id="desconocido" placeholder="Escribe aquí (o déjalo en blanco si no lo sabes)..."></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="submitBtn" onclick="getFeedback()">Recibir una reflexión</button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="rings"><span></span><span></span><span></span></div>
+      <div class="loading-text">Leyendo tu ventana...</div>
+    </div>
+    <div class="error" id="error"></div>
+  </div>
+
+  <div class="feedback" id="feedbackCard">
+    <p class="kicker">Una posible pista sobre tu cuadrante desconocido</p>
+    <p class="feedback-text" id="feedbackText"></p>
+  </div>
+
+  <p class="not-a-grade">Esto es una posibilidad para reflexionar, no una verdad definitiva sobre ti. Puedes intentarlo con otra situación cuando quieras.</p>
+  <div class="actions-center">
+    <button class="ghost" id="resetBtn" style="display:none" onclick="resetForm()">Probar con otra situación</button>
+  </div>
+</div>
+
+<script>
+async function getFeedback() {
+  const abierto = document.getElementById('abierto').value.trim();
+  const ciego = document.getElementById('ciego').value.trim();
+  const oculto = document.getElementById('oculto').value.trim();
+  const desconocido = document.getElementById('desconocido').value.trim();
+  const errorBox = document.getElementById('error');
+  const loading = document.getElementById('loading');
+  const btn = document.getElementById('submitBtn');
+  const feedbackCard = document.getElementById('feedbackCard');
+  const resetBtn = document.getElementById('resetBtn');
+
+  errorBox.classList.remove('active');
+
+  if (!abierto || !ciego || !oculto) {
+    errorBox.textContent = 'Completa al menos Abierto, Ciego y Oculto antes de continuar.';
+    errorBox.classList.add('active');
+    return;
+  }
+
+  btn.disabled = true;
+  loading.classList.add('active');
+  feedbackCard.classList.remove('active');
+
+  try {
+    const response = await fetch('/api/johari', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ abierto, ciego, oculto, desconocido })
+    });
+    if (!response.ok) throw new Error('status_' + response.status);
+    const data = await response.json();
+    const feedback = data.feedback || 'No se recibió retroalimentación. Intenta de nuevo.';
+
+    document.getElementById('feedbackText').textContent = feedback;
+    feedbackCard.classList.add('active');
+    resetBtn.style.display = 'inline-block';
+    feedbackCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (err) {
+    errorBox.textContent = 'Algo falló al generar la reflexión. Intenta de nuevo.';
+    errorBox.classList.add('active');
+  } finally {
+    loading.classList.remove('active');
+    btn.disabled = false;
+  }
+}
+
+function resetForm() {
+  ['abierto','ciego','oculto','desconocido'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('feedbackCard').classList.remove('active');
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('error').classList.remove('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

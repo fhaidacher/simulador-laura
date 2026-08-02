@@ -1,0 +1,9 @@
+{
+  "name": "simulador-laura",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simulador Laura - practica aplicada del programa Liderarme para poder liderar",
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}

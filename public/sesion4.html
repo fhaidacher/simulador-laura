@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Laura · Sesión 4</title>
+<style>
+  :root {
+    --navy: #1E2761; --navy-deep: #171d4d; --navy-soft: #2A3570;
+    --ice: #CADCFC; --copper: #C9A227; --copper-soft: #FFF3D6;
+    --card: #F4F6FC; --muted: #5A6390; --text: #222437; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 300px, #F7F8FC 300px, #F7F8FC 100%);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    color: var(--text); min-height: 100vh; display: flex; justify-content: center;
+    padding: 40px 20px 80px;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  .eyebrow { text-align: center; color: var(--ice); font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+  h1 { font-family: Cambria, Georgia, serif; font-style: italic; font-weight: 700; color: var(--white); text-align: center; font-size: 34px; margin: 0 0 8px; line-height: 1.25; }
+  .sub { text-align: center; color: var(--ice); font-size: 14px; margin-bottom: 20px; }
+  .system-strip { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .system-strip span { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: var(--ice); font-size: 12px; font-weight: 700; letter-spacing: 0.5px; padding: 6px 14px; border-radius: 999px; }
+
+  .mode-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 26px; }
+  .mode-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.22); color: var(--ice); font-size: 12.5px; font-weight: 700; padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+  .mode-btn.active { background: var(--copper); border-color: var(--copper); color: var(--white); }
+
+  .card { background: var(--white); border-radius: 14px; box-shadow: 0 18px 40px rgba(23,29,77,0.18); padding: 30px 32px; margin-bottom: 22px; }
+  .kicker { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--copper); margin: 0 0 10px; }
+  .scenario-text { font-family: Cambria, Georgia, serif; font-style: italic; font-size: 19px; line-height: 1.5; color: var(--navy); margin: 0; }
+
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .field .tool-badge { display: inline-block; background: var(--copper); color: var(--white); font-size: 10px; font-weight: 700; letter-spacing: 0.5px; padding: 2px 9px; border-radius: 999px; margin-right: 8px; vertical-align: middle; }
+  .field .hint { font-size: 12.5px; color: var(--muted); font-style: italic; margin: 0 0 8px; }
+  textarea { width: 100%; min-height: 56px; resize: vertical; border: 1.5px solid var(--ice); border-radius: 8px; padding: 12px 14px; font-family: inherit; font-size: 15px; color: var(--text); background: var(--card); }
+  textarea:focus { outline: none; border-color: var(--copper); background: var(--white); }
+
+  .btn-row { display: flex; justify-content: center; margin-top: 8px; }
+  button.primary { background: var(--copper); color: var(--white); border: none; padding: 14px 30px; font-size: 15px; font-weight: 700; border-radius: 999px; cursor: pointer; box-shadow: 0 8px 20px rgba(201,162,39,0.35); }
+  button.primary:disabled { opacity: 0.6; cursor: default; box-shadow: none; }
+  button.ghost { background: none; border: 1.5px solid var(--ice); color: var(--navy); padding: 10px 22px; font-size: 13.5px; font-weight: 700; border-radius: 999px; cursor: pointer; margin-top: 18px; }
+  button.ghost:hover { border-color: var(--copper); color: var(--copper); }
+
+  .loading { display: none; align-items: center; gap: 18px; justify-content: center; padding: 30px 0 6px; }
+  .loading.active { display: flex; }
+  .rings { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
+  .rings span { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--copper); opacity: 0; animation: ripple 1.8s ease-out infinite; }
+  .rings span:nth-child(2) { animation-delay: 0.5s; } .rings span:nth-child(3) { animation-delay: 1s; }
+  @keyframes ripple { 0% { transform: scale(0.3); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
+  .loading-text { font-style: italic; color: var(--muted); font-size: 14.5px; }
+
+  .feedback { display: none; background: var(--navy); border-radius: 14px; padding: 28px 32px; margin-top: 4px; animation: rise 0.4s ease; }
+  .feedback.active { display: block; }
+  @keyframes rise { from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
+  .feedback .kicker { color: var(--copper); }
+  .feedback-text { font-family: Cambria, Georgia, serif; font-style: italic; font-size: 16.5px; line-height: 1.6; color: var(--white); margin: 4px 0 0; white-space: pre-wrap; }
+  .not-a-grade { text-align: center; font-size: 12.5px; color: var(--muted); font-style: italic; margin-top: 16px; }
+  .error { display: none; background: #FDECEC; border: 1px solid #E8A6A6; color: #8A2C2C; border-radius: 10px; padding: 16px 18px; font-size: 14px; margin-top: 14px; }
+  .error.active { display: block; }
+  .actions-center { text-align: center; }
+
+  @media (max-width: 480px) { h1 { font-size: 26px; } .card { padding: 22px 20px; } .feedback { padding: 22px 20px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Práctica aplicada · Sesión 4 · Los movilizo</div>
+  <h1>Simulador Laura</h1>
+  <div class="sub">Una situación nueva. No es un examen — es práctica.</div>
+  <div class="system-strip"><span>Situación</span><span>Conducta</span><span>Impacto</span></div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeIndividual" onclick="setMode('individual')">Conversación individual</button>
+    <button class="mode-btn" id="modeEquipo" onclick="setMode('equipo')">Decisión de equipo</button>
+  </div>
+
+  <div class="card">
+    <p class="kicker">La situación</p>
+    <p class="scenario-text" id="scenario">
+      Un colaborador hizo un comentario sarcástico sobre el trabajo de otro
+      compañero, delante de todo el equipo.
+    </p>
+  </div>
+
+  <div class="card" id="individualFields">
+    <div class="field">
+      <label><span class="tool-badge">SITUACIÓN</span>¿Cuándo y dónde ocurrió, exactamente?</label>
+      <p class="hint">Objetiva y verificable — sin interpretación todavía.</p>
+      <textarea id="situacion" placeholder="Escribe aquí..."></textarea>
+    </div>
+    <div class="field">
+      <label><span class="tool-badge">CONDUCTA</span>¿Qué conducta observable viste — sin etiquetarla?</label>
+      <p class="hint">Lo que la persona dijo o hizo, no lo que crees que significa sobre su carácter.</p>
+      <textarea id="conducta" placeholder="Escribe aquí..."></textarea>
+    </div>
+    <div class="field">
+      <label><span class="tool-badge">IMPACTO</span>¿Qué impacto generó, en el equipo o en la conversación?</label>
+      <p class="hint">El efecto real — en el clima, en la confianza, en el trabajo.</p>
+      <textarea id="impacto" placeholder="Escribe aquí..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="submitBtn" onclick="getFeedback()">Recibir retroalimentación</button>
+    </div>
+    <div class="loading" id="loading">
+      <div class="rings"><span></span><span></span><span></span></div>
+      <div class="loading-text">Leyendo tu respuesta...</div>
+    </div>
+    <div class="error" id="error"></div>
+  </div>
+
+  <div class="feedback" id="feedbackCard">
+    <p class="kicker">Retroalimentación</p>
+    <p class="feedback-text" id="feedbackText"></p>
+  </div>
+
+  <p class="not-a-grade">Esto es práctica, no una calificación. Puedes intentarlo de nuevo cuando quieras.</p>
+  <div class="actions-center">
+    <button class="ghost" id="resetBtn" style="display:none" onclick="resetForm()">Probar con otra respuesta</button>
+  </div>
+</div>
+
+<script>
+let currentMode = 'individual';
+
+const scenarios = {
+  individual: {
+    text: "Un colaborador hizo un comentario sarcástico sobre el trabajo de otro compañero, delante de todo el equipo.",
+    labels: {
+      f1: { badge: "SITUACIÓN", label: "¿Cuándo y dónde ocurrió, exactamente?", hint: "Objetiva y verificable — sin interpretación todavía." },
+      f2: { badge: "CONDUCTA", label: "¿Qué conducta observable viste — sin etiquetarla?", hint: "Lo que la persona dijo o hizo, no lo que crees que significa sobre su carácter." },
+      f3: { badge: "IMPACTO", label: "¿Qué impacto generó, en el equipo o en la conversación?", hint: "El efecto real — en el clima, en la confianza, en el trabajo." }
+    }
+  },
+  equipo: {
+    text: "Tu equipo se va a fusionar con otro que tiene una forma de trabajar muy distinta, y ya hay tensión anticipada entre ambos grupos.",
+    labels: {
+      f1: { badge: "SITUACIÓN", label: "¿Qué necesita saber tu equipo, exactamente, y cuándo?", hint: "El hecho que vas a comunicar, sin adornarlo ni suavizarlo de más." },
+      f2: { badge: "PREGUNTA ABIERTA", label: "¿Qué pregunta harías para abrir la conversación, en vez de solo instruir?", hint: "Recuerda: abrir con una pregunta, no con una instrucción." },
+      f3: { badge: "BRÚJULA DE EQUIPO", label: "¿Qué necesita esta decisión para sostener la confianza del equipo?", hint: "Piensa en el propósito compartido, no solo en resolver rápido." }
+    }
+  }
+};
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeIndividual').classList.toggle('active', mode === 'individual');
+  document.getElementById('modeEquipo').classList.toggle('active', mode === 'equipo');
+  const s = scenarios[mode];
+  document.getElementById('scenario').textContent = s.text;
+
+  const fields = [['situacion','f1'], ['conducta','f2'], ['impacto','f3']];
+  fields.forEach(([id, key]) => {
+    const conf = s.labels[key];
+    const wrapper = document.getElementById(id).closest('.field');
+    wrapper.querySelector('label').innerHTML = `<span class="tool-badge">${conf.badge}</span>${conf.label}`;
+    wrapper.querySelector('.hint').textContent = conf.hint;
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('feedbackCard').classList.remove('active');
+  document.getElementById('resetBtn').style.display = 'none';
+}
+
+async function getFeedback() {
+  const situacion = document.getElementById('situacion').value.trim();
+  const conducta = document.getElementById('conducta').value.trim();
+  const impacto = document.getElementById('impacto').value.trim();
+  const errorBox = document.getElementById('error');
+  const loading = document.getElementById('loading');
+  const btn = document.getElementById('submitBtn');
+  const feedbackCard = document.getElementById('feedbackCard');
+  const resetBtn = document.getElementById('resetBtn');
+
+  errorBox.classList.remove('active');
+  if (!situacion || !conducta || !impacto) {
+    errorBox.textContent = 'Completa los tres campos antes de recibir retroalimentación.';
+    errorBox.classList.add('active');
+    return;
+  }
+
+  btn.disabled = true;
+  loading.classList.add('active');
+  feedbackCard.classList.remove('active');
+
+  try {
+    const response = await fetch('/api/sesion4', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: currentMode, campo1: situacion, campo2: conducta, campo3: impacto })
+    });
+    if (!response.ok) throw new Error('status_' + response.status);
+    const data = await response.json();
+    document.getElementById('feedbackText').textContent = data.feedback || 'No se recibió retroalimentación. Intenta de nuevo.';
+    feedbackCard.classList.add('active');
+    resetBtn.style.display = 'inline-block';
+    feedbackCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (err) {
+    errorBox.textContent = 'Algo falló al generar la retroalimentación. Intenta de nuevo.';
+    errorBox.classList.add('active');
+  } finally {
+    loading.classList.remove('active');
+    btn.disabled = false;
+  }
+}
+
+function resetForm() {
+  ['situacion','conducta','impacto'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('feedbackCard').classList.remove('active');
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('error').classList.remove('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
